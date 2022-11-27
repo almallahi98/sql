@@ -1,0 +1,88 @@
+#################DDL###############
+
+CREATE DATABASE `store`
+SET FOREIGN_KEY_CHECKS=0;
+
+CREATE TABLE `store`.`countries`  (
+  `code` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(20) NOT NULL,
+  `continent_name` varchar(20) NOT NULL,
+  PRIMARY KEY (`code`),
+  UNIQUE INDEX(`name`)
+);
+
+CREATE TABLE `store`.`order_items`  (
+  `order_id` int NOT NULL AUTO_INCREMENT,
+  `product_id` int NOT NULL,
+  `quantity` int NULL DEFAULT 0,
+  PRIMARY KEY (`order_id`, `product_id`),
+  CONSTRAINT `fk_order_items_orders_1` FOREIGN KEY (`order_id`) REFERENCES `store`.`orders` (`id`),
+  CONSTRAINT `fk_order_items_products_1` FOREIGN KEY (`product_id`) REFERENCES `store`.`products` (`id`)
+);
+
+CREATE TABLE `store`.`orders`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `status` varchar(6) NOT NULL,
+  `created_at` datetime NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_orders_users_1` FOREIGN KEY (`user_id`) REFERENCES `store`.`users` (`id`),
+  CHECK (status='start' or status='finish')
+);
+
+CREATE TABLE `store`.`products`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(10) NOT NULL,
+  `price` int NOT NULL DEFAULT 0,
+  `status` varchar(10) NOT NULL,
+  `created_at` date NOT NULL,
+  PRIMARY KEY (`id`),
+  CHECK (status='valid' or status='expired')
+);
+
+CREATE TABLE `store`.`users`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(20) NOT NULL,
+  `email` varchar(20) NOT NULL,
+  `gender` char(1) NOT NULL,
+  `date_of_birth` varbinary(15) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `country_code` int NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX(`email`),
+  CONSTRAINT `fk_users_countries_1` FOREIGN KEY (`country_code`) REFERENCES `store`.`countries` (`code`),
+  CHECK (gender='m' or gender='f')
+);
+
+SET FOREIGN_KEY_CHECKS=1;
+
+########################################
+Bouns : Add default datetime to created_at column which take the timestap when the row is created
+
+ALTER TABLE `store`.`products` 
+MODIFY COLUMN `created_at` datetime DEFAULT  CURRENT_TIMESTAMP AFTER `status`
+#######################################
+
+######################DML##############
+(1)
+INSERT INTO `store`.`countries` (`code`, `name`, `continent_name`) VALUES (NULL, 'Saudi Arabia', 'Dont know')
+#######################################
+(2)
+INSERT INTO `store`.`users` (`full_name`, `email`, `gender`, `date_of_birth`, `created_at`, `country_code`) VALUES ('Mohammed Al Mallahi', 'x52-@hotmail.com', 'm', '1988/4/12', '2022-11-28 01:49:36', 1)
+#######################################
+(3)
+INSERT INTO `store`.`orders` (`user_id`, `status`, `created_at`) VALUES (1, 'start', '2022-11-28 01:58:33')
+#######################################
+(4)
+INSERT INTO `store`.`products` (`name`, `price`, `status`) VALUES ('kabsa', 60, 'valid')
+#######################################
+(5)
+INSERT INTO `store`.`order_items` (`order_id`, `product_id`, `quantity`) VALUES (1, 1, 1)
+#######################################
+(6)
+UPDATE `store`.`countries` SET `continent_name` = 'I know' WHERE `code` = 1
+#######################################
+(7)
+DELETE FROM `store`.`order_items` WHERE `order_id` = 1 AND `product_id` = 1
+
+DELETE FROM `store`.`products` WHERE `id` = 1
